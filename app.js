@@ -270,8 +270,8 @@ function renderSingleModelDetails(model) {
 // Helper: Extract single question markdown text from model's full text
 function extractQuestionSection(markdown, qNum) {
   const nextQNum = qNum + 1;
-  const nextPattern = "(?:###\\s*第\\s*" + nextQNum + "\\s*题|####\\s*第\\s*" + nextQNum + "\\s*题|###\\s*" + nextQNum + "\\s*题|####\\s*" + nextQNum + "\\s*\\.|## 三|## 四|## 五|## 答案|$)";
-  const startPattern = "(?:第\\s*" + qNum + "\\s*题|####\\s*" + qNum + "\\s*\\.|###\\s*" + qNum + ")";
+  const nextPattern = "(?:###\\s*第\\s*" + nextQNum + "(?!\\d)\\s*题|####\\s*第\\s*" + nextQNum + "(?!\\d)\\s*题|###\\s*" + nextQNum + "(?!\\d)\\s*题|####\\s*" + nextQNum + "(?!\\d)\\s*\\.|## 三|## 四|## 五|## 答案|$)";
+  const startPattern = "(?:第\\s*" + qNum + "(?!\\d)\\s*题|####\\s*" + qNum + "(?!\\d)\\s*\\.|###\\s*" + qNum + "(?!\\d))";
   
   const regex = new RegExp(startPattern + "(.*?)(?=" + nextPattern + ")", "si");
   let m = markdown.match(regex);
@@ -283,8 +283,8 @@ function extractQuestionSection(markdown, qNum) {
   const lines = markdown.split("\n");
   let found = false;
   let qText = [];
-  const startHeaderRegex = new RegExp("^(?:###\\s*第\\s*" + qNum + "\\s*题|####\\s*第\\s*" + qNum + "\\s*题|###\\s*" + qNum + "\\s*题|####\\s*" + qNum + "\\s*\\.)", "i");
-  const nextHeaderRegex = new RegExp("^(?:###\\s*第\\s*" + nextQNum + "\\s*题|####\\s*第\\s*" + nextQNum + "\\s*题|###\\s*" + nextQNum + "\\s*题|####\\s*" + nextQNum + "\\s*\\.|##\\s+)", "i");
+  const startHeaderRegex = new RegExp("^(?:###\\s*第\\s*" + qNum + "(?!\\d)\\s*题|####\\s*第\\s*" + qNum + "(?!\\d)\\s*题|###\\s*" + qNum + "(?!\\d)\\s*题|####\\s*" + qNum + "(?!\\d)\\s*\\.)", "i");
+  const nextHeaderRegex = new RegExp("^(?:###\\s*第\\s*" + nextQNum + "(?!\\d)\\s*题|####\\s*第\\s*" + nextQNum + "(?!\\d)\\s*题|###\\s*" + nextQNum + "(?!\\d)\\s*题|####\\s*" + nextQNum + "(?!\\d)\\s*\\.|##\\s+)", "i");
   
   for (let l of lines) {
     const norm = l.trim().toLowerCase();
@@ -303,6 +303,7 @@ function extractQuestionSection(markdown, qNum) {
 
   return "*未找到该题的完整解答。请参阅模型全卷回答。*";
 }
+
 
 // Render Question Comparison View
 function initQuestionComparison() {
