@@ -936,6 +936,23 @@ tr:hover td {
     margin-bottom: 16px;
   }
 
+  /* Prevent flex/grid items from stretching due to math formulas */
+  body, main {
+    overflow-x: hidden !important;
+  }
+  
+  .view-container, .view, .dashboard-layout, .detail-layout, .comparison-layout, .comparison-split, .comparison-box, .model-details-card, .card {
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  .katex-display {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+
   /* Robust Markdown Content rendering for mobile */
   .markdown-body {
     word-break: break-word;
