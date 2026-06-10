@@ -410,11 +410,8 @@ tr:hover td {
 }
 
 .comment-cell {
-  max-width: 320px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   color: hsl(var(--color-text-secondary));
+  line-height: 1.6;
 }
 
 /* Detail View Layout */
