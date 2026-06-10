@@ -22,6 +22,9 @@ const QUESTIONS_META = [
   { id: 19, type: "解答题", score: 17, key: "(1) (0, 3/2) (2) 见证明 (3)(i) 见证明 (ii) 见证明", desc: "导数综合压轴题：集合定义、奇偶性证明及构造法单调性证明" }
 ];
 
+const renderedContentCache = {};
+const comparisonCache = {};
+
 document.addEventListener("DOMContentLoaded", () => {
   // Check if data is loaded
   if (typeof GAOKAO_DATA === "undefined") {
@@ -230,6 +233,24 @@ function initModelDetails() {
     // Click the first model by default
     if (idx === 0) btn.click();
   });
+
+  // Pre-render other models in the background to avoid any click lag
+  setTimeout(() => {
+    models.forEach(m => {
+      if (!renderedContentCache[m.id]) {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = marked.parse(m.content);
+        renderMathInElement(tempDiv, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false }
+          ],
+          throwOnError: false
+        });
+        renderedContentCache[m.id] = tempDiv.innerHTML;
+      }
+    });
+  }, 200);
 }
 
 function renderSingleModelDetails(model) {
@@ -255,16 +276,24 @@ function renderSingleModelDetails(model) {
 
   // Load Answer Markdown Content
   const ansBox = document.getElementById("modelAnswerBody");
-  ansBox.innerHTML = marked.parse(model.content);
   
-  // Render LaTeX math expressions
-  renderMathInElement(ansBox, {
-    delimiters: [
-      { left: "$$", right: "$$", display: true },
-      { left: "$", right: "$", display: false }
-    ],
-    throwOnError: false
-  });
+  if (renderedContentCache[model.id]) {
+    ansBox.innerHTML = renderedContentCache[model.id];
+  } else {
+    ansBox.innerHTML = marked.parse(model.content);
+    
+    // Render LaTeX math expressions
+    renderMathInElement(ansBox, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false }
+      ],
+      throwOnError: false
+    });
+    
+    // Cache the rendered HTML
+    renderedContentCache[model.id] = ansBox.innerHTML;
+  }
 }
 
 // Helper: Extract single question markdown text from model's full text
@@ -380,30 +409,39 @@ function renderQuestionComparison(q) {
 
 function renderComparisonBox(containerId, model, q) {
   const box = document.getElementById(containerId);
-  const rawText = extractQuestionSection(model.content, q.id);
+  const contentEl = box.querySelector(".comparison-content");
   
-  // Status check: did this model lose points on this question?
-  // We can check if the question key (e.g. Q14 or Q15(2)) exists in deductions
-  const isDeducted = Object.keys(model.deductions).some(k => k.startsWith(`Q${q.id}`));
-  const deductVal = model.deductions[`Q${q.id}`] || (model.deductions[`Q${q.id}(1)`] + model.deductions[`Q${q.id}(2)`]) || 0;
-  
-  let statusHtml = "";
-  if (isDeducted) {
-    statusHtml = `<div class="performance-status fail"><i data-lucide="x-circle" style="width: 14px; height: 14px; vertical-align: middle;"></i> 扣 ${deductVal} 分（在该题或其子问中被扣分）</div>`;
+  const cacheKey = `${model.id}_${q.id}`;
+  if (comparisonCache[cacheKey]) {
+    contentEl.innerHTML = comparisonCache[cacheKey];
   } else {
-    statusHtml = `<div class="performance-status success"><i data-lucide="check-circle" style="width: 14px; height: 14px; vertical-align: middle;"></i> 拿满分（或完全符合本题官方标准）</div>`;
-  }
+    const rawText = extractQuestionSection(model.content, q.id);
+    
+    // Status check: did this model lose points on this question?
+    // We can check if the question key (e.g. Q14 or Q15(2)) exists in deductions
+    const isDeducted = Object.keys(model.deductions).some(k => k.startsWith(`Q${q.id}`));
+    const deductVal = model.deductions[`Q${q.id}`] || (model.deductions[`Q${q.id}(1)`] + model.deductions[`Q${q.id}(2)`]) || 0;
+    
+    let statusHtml = "";
+    if (isDeducted) {
+      statusHtml = `<div class="performance-status fail"><i data-lucide="x-circle" style="width: 14px; height: 14px; vertical-align: middle;"></i> 扣 ${deductVal} 分（在该题或其子问中被扣分）</div>`;
+    } else {
+      statusHtml = `<div class="performance-status success"><i data-lucide="check-circle" style="width: 14px; height: 14px; vertical-align: middle;"></i> 拿满分（或完全符合本题官方标准）</div>`;
+    }
 
-  box.querySelector(".comparison-content").innerHTML = marked.parse(rawText) + statusHtml;
-  
-  // Math render
-  renderMathInElement(box.querySelector(".comparison-content"), {
-    delimiters: [
-      { left: "$$", right: "$$", display: true },
-      { left: "$", right: "$", display: false }
-    ],
-    throwOnError: false
-  });
+    contentEl.innerHTML = marked.parse(rawText) + statusHtml;
+    
+    // Math render
+    renderMathInElement(contentEl, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false }
+      ],
+      throwOnError: false
+    });
+    
+    comparisonCache[cacheKey] = contentEl.innerHTML;
+  }
   
   lucide.createIcons();
 }
