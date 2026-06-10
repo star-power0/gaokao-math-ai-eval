@@ -270,8 +270,8 @@ function renderSingleModelDetails(model) {
 // Helper: Extract single question markdown text from model's full text
 function extractQuestionSection(markdown, qNum) {
   const nextQNum = qNum + 1;
-  const nextPattern = "(?:### 第" + nextQNum + "题|#### 第" + nextQNum + "题|### " + nextQNum + "题|#### " + nextQNum + "\\.|## 三|## 四|## 五|## 答案|$)";
-  const startPattern = "(?:第" + qNum + "题|#### " + qNum + "\\.|" + qNum + "\\s*题|第" + qNum + "题|### " + qNum + ")";
+  const nextPattern = "(?:###\\s*第\\s*" + nextQNum + "\\s*题|####\\s*第\\s*" + nextQNum + "\\s*题|###\\s*" + nextQNum + "\\s*题|####\\s*" + nextQNum + "\\s*\\.|## 三|## 四|## 五|## 答案|$)";
+  const startPattern = "(?:第\\s*" + qNum + "\\s*题|####\\s*" + qNum + "\\s*\\.|###\\s*" + qNum + ")";
   
   const regex = new RegExp(startPattern + "(.*?)(?=" + nextPattern + ")", "si");
   let m = markdown.match(regex);
@@ -283,19 +283,17 @@ function extractQuestionSection(markdown, qNum) {
   const lines = markdown.split("\n");
   let found = false;
   let qText = [];
+  const startHeaderRegex = new RegExp("^(?:###\\s*第\\s*" + qNum + "\\s*题|####\\s*第\\s*" + qNum + "\\s*题|###\\s*" + qNum + "\\s*题|####\\s*" + qNum + "\\s*\\.)", "i");
+  const nextHeaderRegex = new RegExp("^(?:###\\s*第\\s*" + nextQNum + "\\s*题|####\\s*第\\s*" + nextQNum + "\\s*题|###\\s*" + nextQNum + "\\s*题|####\\s*" + nextQNum + "\\s*\\.|##\\s+)", "i");
+  
   for (let l of lines) {
     const norm = l.trim().toLowerCase();
-    if (norm.startsWith("### 第" + qNum + "题") || norm.startsWith("#### " + qNum + ".") || norm.startsWith("### " + qNum + " ") || norm.startsWith("### " + qNum + "题") || norm.startsWith("#### 第" + qNum + "题")) {
+    if (startHeaderRegex.test(norm)) {
       found = true;
       continue;
     }
     if (found) {
-      const isNextHeader = norm.startsWith("### 第" + nextQNum + "题") || 
-                           norm.startsWith("#### 第" + nextQNum + "题") || 
-                           norm.startsWith("### " + nextQNum + "题") || 
-                           norm.startsWith("#### " + nextQNum + ".") ||
-                           norm.startsWith("## ");
-      if (isNextHeader) {
+      if (nextHeaderRegex.test(norm)) {
         break;
       }
       qText.push(l);
