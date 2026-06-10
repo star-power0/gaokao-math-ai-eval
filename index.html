@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026年高考数学 AI 模型打分评测系统</title>
+  
+  <!-- KaTeX CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sidebar Navigation -->
+  <aside>
+    <div class="brand">
+      <div class="brand-logo">Σ</div>
+      <div class="brand-title">高考数学 AI 评测</div>
+    </div>
+    
+    <nav>
+      <a class="nav-item active" data-target="dashboardView">
+        <i data-lucide="layout-dashboard"></i>
+        <span>评测仪表盘</span>
+      </a>
+      <a class="nav-item" data-target="modelView">
+        <i data-lucide="cpu"></i>
+        <span>模型作答详情</span>
+      </a>
+      <a class="nav-item" data-target="comparisonView">
+        <i data-lucide="git-compare"></i>
+        <span>逐题对比分析</span>
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle">
+        <i data-lucide="moon"></i>
+        <span>深色模式</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main>
+    <header>
+      <h1 id="headerTitle">高考数学 AI 模型打分与评测</h1>
+      <div class="header-actions">
+        <div style="font-size: 14px; opacity: 0.6; font-family: 'Outfit';">2026 Gaokao Math Evaluation</div>
+      </div>
+    </header>
+    
+    <div class="view-container">
+      
+      <!-- 1. Dashboard View -->
+      <section class="view active" id="dashboardView">
+        <!-- Stats Cards Grid -->
+        <div class="grid-3">
+          <div class="stat-card">
+            <div class="stat-label">平均成绩</div>
+            <div class="stat-value" id="avgScore">130.2</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">最高成绩</div>
+            <div class="stat-value" id="maxScore">142</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">最低成绩</div>
+            <div class="stat-value" id="minScore">116</div>
+          </div>
+        </div>
+        
+        <!-- Leaderboard & Charts -->
+        <div class="dashboard-layout">
+          <!-- Leaderboard Card -->
+          <div class="card">
+            <h2 class="card-title"><i data-lucide="trophy" style="color: hsl(var(--accent-cyan));"></i> AI 评测排行榜 (Leaderboard)</h2>
+            <div class="table-wrapper">
+              <table>
+                <thead>
+                  <tr>
+                    <th style="width: 70px;">排名</th>
+                    <th>模型名称</th>
+                    <th>官方标准得分</th>
+                    <th>核心评语</th>
+                  </tr>
+                </thead>
+                <tbody id="leaderboardBody">
+                  <!-- JS Dynamic Render -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          <!-- Chart Card -->
+          <div class="card">
+            <h2 class="card-title"><i data-lucide="bar-chart-3" style="color: hsl(var(--accent-purple));"></i> 得分分布直方图</h2>
+            <div style="height: 280px; position: relative;">
+              <canvas id="scoreChart"></canvas>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Markdown Report Card -->
+        <div class="card" style="margin-top: 32px;">
+          <h2 class="card-title"><i data-lucide="file-text" style="color: hsl(var(--accent-cyan));"></i> 2026年高考数学AI模型打分评测报告 (全文)</h2>
+          <div class="markdown-body" id="reportContainer">
+            <!-- JS Rendered Markdown -->
+          </div>
+        </div>
+      </section>
+      
+      <!-- 2. Model Detail View -->
+      <section class="view" id="modelView">
+        <div class="detail-layout">
+          <!-- Models List -->
+          <div class="selector-panel" id="modelsList">
+            <!-- JS Rendered Buttons -->
+          </div>
+          
+          <!-- Selected Model Detail Card -->
+          <div class="card model-details-card">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px; border-bottom: 1px solid hsla(var(--color-border), 0.3); padding-bottom: 20px;">
+              <div>
+                <h2 id="modelNameTitle" style="font-family: var(--font-heading); font-size: 24px; font-weight: 700; margin-bottom: 8px;">DeepSeek v4 Pro</h2>
+                <div id="modelRankBadge" style="display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; background-color: hsla(var(--accent-cyan), 0.1); color: hsl(var(--accent-cyan)); border: 1px solid hsla(var(--accent-cyan), 0.2);">Rank 1</div>
+              </div>
+              <div id="modelScoreValue" style="font-family: var(--font-heading); font-size: 40px; font-weight: 800; color: hsl(var(--accent-cyan));">142分</div>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <h3 style="font-family: var(--font-heading); font-size: 14px; color: hsl(var(--color-text-secondary)); text-transform: uppercase; margin-bottom: 6px;">核心评语</h3>
+              <p id="modelCommentText" style="font-size: 15px; line-height: 1.6; color: hsl(var(--color-text-primary));"></p>
+            </div>
+            
+            <div style="margin-bottom: 24px;">
+              <h3 style="font-family: var(--font-heading); font-size: 14px; color: hsl(var(--color-text-secondary)); text-transform: uppercase; margin-bottom: 6px;">扣分大类</h3>
+              <div class="deductions-box" id="modelDeductionsList">
+                <!-- JS Rendered Badges -->
+              </div>
+            </div>
+            
+            <!-- Answer Content Tab Panels -->
+            <div class="tab-controls">
+              <button class="tab-button active">模型完整答卷与推导</button>
+            </div>
+            
+            <div class="markdown-body" id="modelAnswerBody">
+              <!-- Rendered Markdown solutions -->
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- 3. Question Comparison View -->
+      <section class="view" id="comparisonView">
+        <div class="comparison-layout">
+          <!-- Question Selector Sidebar -->
+          <div class="selector-panel" id="questionsList">
+            <!-- JS Rendered Buttons -->
+          </div>
+          
+          <!-- Comparison Panel -->
+          <div class="card comparison-card">
+            <div class="qa-header">
+              <h2 id="questionTitleText" style="font-family: var(--font-heading); font-size: 20px; font-weight: 700; margin-bottom: 12px;">第 14 题 - 数列问题公比 q 最值</h2>
+              <div style="display: flex; gap: 8px;">
+                <span class="deduction-badge" id="questionScoreBadge" style="background-color: hsla(var(--accent-purple), 0.1); color: hsl(var(--accent-purple)); border-color: hsla(var(--accent-purple), 0.2);">分值: 5分</span>
+                <span class="deduction-badge no-deduction" id="questionKeyBadge">标准答案: ³√(3/2)</span>
+              </div>
+            </div>
+            
+            <div class="question-text-box" id="questionTextDisplay">
+              <!-- Rendered Question details -->
+            </div>
+            
+            <!-- Split Comparison Views -->
+            <div class="comparison-split">
+              <!-- Left Model A -->
+              <div class="comparison-box model-box" id="compareBoxA">
+                <div class="comparison-box-title">
+                  <span>模型 A</span>
+                  <select id="compareModelA">
+                    <!-- Dropdown Options -->
+                  </select>
+                </div>
+                <div class="comparison-content markdown-body">
+                  <!-- Rendered Model A's answer for this question -->
+                </div>
+              </div>
+              
+              <!-- Right Model B -->
+              <div class="comparison-box model-box" id="compareBoxB">
+                <div class="comparison-box-title">
+                  <span>模型 B</span>
+                  <select id="compareModelB">
+                    <!-- Dropdown Options -->
+                  </select>
+                </div>
+                <div class="comparison-content markdown-body">
+                  <!-- Rendered Model B's answer for this question -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+    </div>
+  </main>
+
+  <!-- Lucide Icons -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide/dist/umd/lucide.min.js"></script>
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Marked.js (Markdown renderer) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  
+  <!-- KaTeX core JS and Auto-render extension -->
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
+  
+  <!-- Data Payload -->
+  <script src="data.js"></script>
+  
+  <!-- App Controller -->
+  <script src="app.js"></script>
+  
+  <script>
+    // Initialize icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
