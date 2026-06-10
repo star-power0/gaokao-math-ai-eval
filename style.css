@@ -750,13 +750,15 @@ tr:hover td {
     display: flex;
     flex-direction: row;
     overflow-x: auto;
-    gap: 8px;
+    gap: 6px;
     white-space: nowrap;
     -webkit-overflow-scrolling: touch;
   }
   
   .nav-item {
-    padding: 8px 14px;
+    padding: 8px 12px;
+    font-size: 13px;
+    gap: 6px;
     flex-shrink: 0;
   }
   
@@ -816,27 +818,87 @@ tr:hover td {
     padding: 16px;
   }
   
-  /* Tables - Scrollable on mobile, but keep full wrapping comment text */
-  th, td {
-    padding: 10px 8px;
+  /* Convert Table to Card List on mobile */
+  .table-wrapper {
+    border: none;
+    background: none;
   }
-  
-  table {
-    font-size: 13px;
-    min-width: 600px; /* Force minimum table width for clean horizontal scrolling */
+
+  table, tbody, tr, td {
+    display: block;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 14px;
+    border-bottom: 1px solid hsla(var(--color-border), 0.3);
+    background-color: hsla(var(--color-card), var(--glass-opacity));
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(10px);
+    margin-bottom: 14px;
+    border-radius: 12px;
+    border: 1px solid hsla(var(--color-border), 0.3);
+    align-items: center;
+  }
+
+  tr:last-child {
+    margin-bottom: 0;
+  }
+
+  td {
+    padding: 0 !important;
+  }
+
+  /* td:nth-child(1) is Rank Badge */
+  tr td:nth-child(1) {
+    order: 1;
+    width: auto !important;
+  }
+
+  /* td:nth-child(2) is Model Name */
+  tr td:nth-child(2) {
+    order: 2;
+    width: auto !important;
+    flex-grow: 1;
+    padding-left: 10px !important;
   }
 
   .model-name-link {
-    white-space: nowrap;
-    font-size: 13px;
+    font-size: 15px;
+    font-weight: 600;
   }
 
-  /* Core comments wrap naturally instead of truncating */
+  /* td:nth-child(3) is Score */
+  tr td:nth-child(3) {
+    order: 3;
+    width: auto !important;
+    text-align: right;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  /* td:nth-child(4) is Core Comment */
+  tr td:nth-child(4) {
+    order: 4;
+    width: 100% !important;
+    margin-top: 10px;
+    padding-top: 10px !important;
+    border-top: 1px dashed hsla(var(--color-border), 0.4);
+  }
+
   .comment-text {
-    max-width: none;
-    overflow: visible;
-    text-overflow: clip;
+    font-size: 13px;
+    line-height: 1.5;
     white-space: normal;
+    word-break: break-word;
+    color: hsl(var(--color-text-secondary));
   }
 
   /* Responsive Chart Height */
@@ -872,6 +934,21 @@ tr:hover td {
     padding: 12px;
     font-size: 14px;
     margin-bottom: 16px;
+  }
+
+  /* Robust Markdown Content rendering for mobile */
+  .markdown-body {
+    word-break: break-word;
+  }
+  .markdown-body table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+  .markdown-body pre {
+    padding: 12px;
+    font-size: 13px;
   }
 }
 
