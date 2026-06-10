@@ -269,15 +269,14 @@ function renderSingleModelDetails(model) {
 
 // Helper: Extract single question markdown text from model's full text
 function extractQuestionSection(markdown, qNum) {
-  // Handle various header formats in markdown
-  const patterns = [
-    new RegExp("(?:第" + qNum + "题|#### " + qNum + "\\.|" + qNum + "\\s*题|第" + qNum + "题|### " + qNum + ")(.*?)(?=### 第|#### |## 三|## 四|## 五|$)", "si")
-  ];
-  for (let p of patterns) {
-    let m = markdown.match(p);
-    if (m) {
-      return m[1].trim();
-    }
+  const nextQNum = qNum + 1;
+  const nextPattern = "(?:### 第" + nextQNum + "题|#### 第" + nextQNum + "题|### " + nextQNum + "题|#### " + nextQNum + "\\.|## 三|## 四|## 五|## 答案|$)";
+  const startPattern = "(?:第" + qNum + "题|#### " + qNum + "\\.|" + qNum + "\\s*题|第" + qNum + "题|### " + qNum + ")";
+  
+  const regex = new RegExp(startPattern + "(.*?)(?=" + nextPattern + ")", "si");
+  let m = markdown.match(regex);
+  if (m) {
+    return m[1].trim();
   }
   
   // Fallback search
@@ -291,7 +290,12 @@ function extractQuestionSection(markdown, qNum) {
       continue;
     }
     if (found) {
-      if (norm.startsWith("###") || norm.startsWith("####") || norm.startsWith("##")) {
+      const isNextHeader = norm.startsWith("### 第" + nextQNum + "题") || 
+                           norm.startsWith("#### 第" + nextQNum + "题") || 
+                           norm.startsWith("### " + nextQNum + "题") || 
+                           norm.startsWith("#### " + nextQNum + ".") ||
+                           norm.startsWith("## ");
+      if (isNextHeader) {
         break;
       }
       qText.push(l);
